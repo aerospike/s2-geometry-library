@@ -23,7 +23,7 @@ using std::make_pair;
 
 #include "s2loop.h"
 
-#include "base/commandlineflags.h"
+// #include "base/commandlineflags.h"
 #include "base/logging.h"
 #include "base/scoped_ptr.h"
 #include "util/coding/coder.h"
@@ -33,7 +33,7 @@ using std::make_pair;
 
 static const unsigned char kCurrentEncodingVersionNumber = 1;
 
-DECLARE_bool(s2debug);  // defined in s2.cc
+// DECLARE_bool(s2debug);  // defined in s2.cc
 
 S2Point const* S2LoopIndex::edge_from(int index) const {
   return &loop_->vertex(index);

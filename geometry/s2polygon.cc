@@ -17,7 +17,7 @@ using std::multiset;
 using std::vector;
 
 
-#include "base/commandlineflags.h"
+// #include "base/commandlineflags.h"
 #include "s2polygon.h"
 
 #include "base/port.h"  // for HASH_NAMESPACE_DECLARATION_START
@@ -30,7 +30,7 @@ using std::vector;
 #include "s2polygonbuilder.h"
 #include "s2polyline.h"
 
-DECLARE_bool(s2debug);  // defined in s2.cc
+// DECLARE_bool(s2debug);  // defined in s2.cc
 
 static const unsigned char kCurrentEncodingVersionNumber = 1;
 
@@ -227,7 +227,8 @@ bool S2Polygon::ContainsChild(S2Loop* a, S2Loop* b, LoopMap const& loop_map) {
 }
 
 void S2Polygon::Init(vector<S2Loop*>* loops) {
-  if (FLAGS_s2debug) CHECK(IsValid(*loops));
+  // if (FLAGS_s2debug) CHECK(IsValid(*loops));
+  if (S2::debug) CHECK(IsValid(*loops));
   DCHECK(loops_.empty());
   loops_.swap(*loops);
 
@@ -244,7 +245,8 @@ void S2Polygon::Init(vector<S2Loop*>* loops) {
   loops_.clear();
   InitLoop(NULL, -1, &loop_map);
 
-  if (FLAGS_s2debug) {
+  // if (FLAGS_s2debug) {
+  if (S2::debug) {
     // Check that the LoopMap is correct (this is fairly cheap).
     for (int i = 0; i < num_loops(); ++i) {
       for (int j = 0; j < num_loops(); ++j) {

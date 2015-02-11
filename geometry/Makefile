@@ -9,7 +9,8 @@ ZLIB_DIR=/usr
 
 PYTHON_INC=-I/usr/include/python$(PYTHON_VER) -I/usr/lib/python$(PYTHON_VER)
 
-DEBUG=-O -DNDEBUG
+DEBUG=-g
+# DEBUG=-O -DNDEBUG
 SYSCFLAGS=-fPIC
 CCC=g++
 
@@ -17,6 +18,8 @@ GFLAGS_INC = -I$(GFLAGS_DIR)/include
 ZLIB_INC = -I$(ZLIB_DIR)/include
 CFLAGS= $(SYSCFLAGS) $(DEBUG) -I. -DARCH_K8 $(GFLAGS_INC) $(ZLIB_INC) \
         -Wno-deprecated -DS2_USE_EXACTFLOAT
+
+CFLAGS += -DHASH_NAMESPACE=__gnu_cxx
 
 # ----- OS Dependent -----
 OS=$(shell uname -s)
@@ -38,7 +41,7 @@ LDFLAGS=$(GFLAGS_LNK) $(ZLIB_LNK)
 
 BINARIES= #s2cellid_test
 
-all: libs $(BINARIES)
+all: mkobjdir libs $(BINARIES)
 
 LIBS = \
 	libgoogle-base.a\
@@ -49,11 +52,22 @@ LIBS = \
 	libgoogle-util-geometry-s2.a\
 	libgoogle-util-geometry-s2testing.a
 
+mkobjdir:
+	mkdir -p objs
+	mkdir -p base/objs
+	mkdir -p strings/objs
+	mkdir -p util/math/objs
+	mkdir -p util/coding/objs
+
 libs: $(LIBS)
 
 clean:
 	rm -f *.a
 	rm -f objs/*.o
+	rm -f base/objs/*.o
+	rm -f strings/objs/*.o
+	rm -f util/math/objs/*.o
+	rm -f util/coding/objs/*.o
 	rm -f $(BINARIES)
 	rm s2/*wrap*
 	rm -f *.so
@@ -61,6 +75,7 @@ clean:
 # base.
 
 GOOGLE_BASE_LIB_OBJS = \
+	base/objs/strtoint.o\
 	base/objs/int128.o\
 	base/objs/logging.o\
 	base/objs/stringprintf.o

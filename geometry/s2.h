@@ -64,6 +64,7 @@ template<> struct hash<S2Point> {
 //
 class S2 {
  public:
+  static const bool debug;
   // Return a unique "origin" on the sphere for operations that need a fixed
   // reference point.  In particular, this is the "point at infinity" used for
   // point-in-polygon testing (by counting the number of edge crossings).

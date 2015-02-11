@@ -139,9 +139,43 @@ char *FastInt64ToBuffer(int64 i, char* buffer) {
 // null character.  Also used by FastInt32ToBufferLeft
 static const int kFastInt32ToBufferOffset = 11;
 
+// Copied from http://gears.googlecode.com/svn-history/r395/trunk/gears/base/common/string16.cc
 char *FastInt32ToBuffer(int32 i, char* buffer) {
-  FastInt32ToBufferLeft(i, buffer);
-  return buffer;
+  // We could collapse the positive and negative sections, but that
+  // would be slightly slower for positive numbers...
+  // 12 bytes is enough to store -2**32, -4294967296.
+  char* p = buffer + kFastInt32ToBufferOffset;
+  *p-- = '\0';
+  if (i >= 0) {
+    do {
+      *p-- = '0' + i % 10;
+      i /= 10;
+    } while (i > 0);
+    return p + 1;
+  } else {
+    // On different platforms, % and / have different behaviors for
+    // negative numbers, so we need to jump through hoops to make sure
+    // we don't divide negative numbers.
+    if (i > -10) {
+      i = -i;
+      *p-- = '0' + i;
+      *p = '-';
+      return p;
+    } else {
+      // Make sure we aren't at MIN_INT, in which case we can't say i = -i
+      i = i + 10;
+      i = -i;
+      *p-- = '0' + i % 10;
+      // Undo what we did a moment ago
+      i = i / 10 + 1;
+      do {
+        *p-- = '0' + i % 10;
+        i /= 10;
+      } while (i > 0);
+      *p = '-';
+      return p;
+    }
+  }
 }
 
 char *FastHexToBuffer(int i, char* buffer) {
@@ -199,6 +233,139 @@ static const char two_ASCII_digits[100][2] = {
   {'9','0'}, {'9','1'}, {'9','2'}, {'9','3'}, {'9','4'},
   {'9','5'}, {'9','6'}, {'9','7'}, {'9','8'}, {'9','9'}
 };
+
+char* FastUInt32ToBufferLeft(uint32 u, char* buffer) {
+  int digits;
+  const char *ASCII_digits = NULL;
+  // The idea of this implementation is to trim the number of divides to as few
+  // as possible by using multiplication and subtraction rather than mod (%),
+  // and by outputting two digits at a time rather than one.
+  // The huge-number case is first, in the hopes that the compiler will output
+  // that case in one branch-free block of code, and only output conditional
+  // branches into it from below.
+  if (u >= 1000000000) {  // >= 1,000,000,000
+    digits = u / 100000000;  // 100,000,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt100_000_000:
+    u -= digits * 100000000;  // 100,000,000
+lt100_000_000:
+    digits = u / 1000000;  // 1,000,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt1_000_000:
+    u -= digits * 1000000;  // 1,000,000
+lt1_000_000:
+    digits = u / 10000;  // 10,000
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt10_000:
+    u -= digits * 10000;  // 10,000
+lt10_000:
+    digits = u / 100;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+sublt100:
+    u -= digits * 100;
+lt100:
+    digits = u;
+    ASCII_digits = two_ASCII_digits[digits];
+    buffer[0] = ASCII_digits[0];
+    buffer[1] = ASCII_digits[1];
+    buffer += 2;
+done:
+    *buffer = 0;
+    return buffer;
+  }
+
+  if (u < 100) {
+    digits = u;
+    if (u >= 10) goto lt100;
+    *buffer++ = '0' + digits;
+    goto done;
+  }
+  if (u  <  10000) {   // 10,000
+    if (u >= 1000) goto lt10_000;
+    digits = u / 100;
+    *buffer++ = '0' + digits;
+    goto sublt100;
+  }
+  if (u  <  1000000) {   // 1,000,000
+    if (u >= 100000) goto lt1_000_000;
+    digits = u / 10000;  //    10,000
+    *buffer++ = '0' + digits;
+    goto sublt10_000;
+  }
+  if (u  <  100000000) {   // 100,000,000
+    if (u >= 10000000) goto lt100_000_000;
+    digits = u / 1000000;  //   1,000,000
+    *buffer++ = '0' + digits;
+    goto sublt1_000_000;
+  }
+  // we already know that u < 1,000,000,000
+  digits = u / 100000000;   // 100,000,000
+  *buffer++ = '0' + digits;
+  goto sublt100_000_000;
+}
+
+char* FastUInt64ToBufferLeft(uint64 u64, char* buffer) {
+  int digits;
+  const char *ASCII_digits = NULL;
+
+  uint32 u = static_cast<uint32>(u64);
+  if (u == u64) return FastUInt32ToBufferLeft(u, buffer);
+
+  uint64 top_11_digits = u64 / 1000000000;
+  buffer = FastUInt64ToBufferLeft(top_11_digits, buffer);
+  u = u64 - (top_11_digits * 1000000000);
+
+  digits = u / 10000000;  // 10,000,000
+  DCHECK_LT(digits, 100);
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 10000000;  // 10,000,000
+  digits = u / 100000;  // 100,000
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 100000;  // 100,000
+  digits = u / 1000;  // 1,000
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 1000;  // 1,000
+  digits = u / 10;
+  ASCII_digits = two_ASCII_digits[digits];
+  buffer[0] = ASCII_digits[0];
+  buffer[1] = ASCII_digits[1];
+  buffer += 2;
+  u -= digits * 10;
+  digits = u;
+  *buffer++ = '0' + digits;
+  *buffer = 0;
+  return buffer;
+}
+
+char* FastInt64ToBufferLeft(int64 i, char* buffer) {
+  uint64 u = i;
+  if (i < 0) {
+    *buffer++ = '-';
+    u = -i;
+  }
+  return FastUInt64ToBufferLeft(u, buffer);
+}
 
 static inline void PutTwoDigits(int i, char* p) {
   DCHECK_GE(i, 0);
