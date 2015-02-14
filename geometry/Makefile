@@ -69,7 +69,7 @@ clean:
 	rm -f util/math/objs/*.o
 	rm -f util/coding/objs/*.o
 	rm -f $(BINARIES)
-	rm s2/*wrap*
+	rm -f s2/*wrap*
 	rm -f *.so
 
 # base.
