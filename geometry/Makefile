@@ -9,7 +9,7 @@ ZLIB_DIR=/usr
 
 PYTHON_INC=-I/usr/include/python$(PYTHON_VER) -I/usr/lib/python$(PYTHON_VER)
 
-DEBUG=-g -O3
+DEBUG=-g -O3 -DNDEBUG
 # DEBUG=-O3 -DNDEBUG
 SYSCFLAGS=-fPIC
 CCC=g++
