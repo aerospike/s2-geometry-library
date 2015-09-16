@@ -1,7 +1,5 @@
 # Please edit the following:
 PYTHON_VER=2.6
-# TODO(tudorh): Fix this.
-GFLAGS_DIR=/home/tudorh/usr
 SWIG_BINARY=swig
 ZLIB_DIR=/usr
 
@@ -14,9 +12,8 @@ DEBUG=-g -O3 -DNDEBUG
 SYSCFLAGS=-fPIC
 CCC=g++
 
-GFLAGS_INC = -I$(GFLAGS_DIR)/include
 ZLIB_INC = -I$(ZLIB_DIR)/include
-CFLAGS= $(SYSCFLAGS) $(DEBUG) -I. -DARCH_K8 $(GFLAGS_INC) $(ZLIB_INC) \
+CFLAGS= $(SYSCFLAGS) $(DEBUG) -I. -DARCH_K8 $(ZLIB_INC) \
         -Wno-deprecated -DS2_USE_EXACTFLOAT
 
 CFLAGS += -DHASH_NAMESPACE=__gnu_cxx
@@ -26,16 +23,14 @@ OS=$(shell uname -s)
 
 ifeq ($(OS),Linux)
 LD = gcc -shared
-GFLAGS_LNK = -Wl,-rpath $(GFLAGS_DIR)/lib -L$(GFLAGS_DIR)/lib -lgflags
 ZLIB_LNK = -Wl,-rpath $(ZLIB_DIR)/lib -L$(ZLIB_DIR)/lib -lz
 endif
 ifeq ($(OS),Darwin) # Assume Mac Os X
 LD = ld -arch x86_64 -bundle -flat_namespace -undefined suppress
-GFLAGS_LNK = -L$(GFLAGS_DIR)/lib -lgflags
 ZLIB_LNK = -L$(ZLIB_DIR)/lib -lz
 endif
 
-LDFLAGS=$(GFLAGS_LNK) $(ZLIB_LNK)
+LDFLAGS=$(ZLIB_LNK)
 
 # Real targets
 
