@@ -234,7 +234,7 @@ inline bool S2EdgeIndex::Iterator::Done() const {
   if (is_brute_force_) {
     return (current_index_ >= num_edges_);
   } else {
-    return current_index_in_candidates_ >= candidates_.size();
+	  return size_t(current_index_in_candidates_) >= candidates_.size();
   }
 }
 
@@ -249,7 +249,7 @@ inline void S2EdgeIndex::Iterator::Next() {
     current_index_++;
   } else {
     current_index_in_candidates_++;
-    if (current_index_in_candidates_ < candidates_.size()) {
+    if (size_t(current_index_in_candidates_) < candidates_.size()) {
       current_index_ = candidates_[current_index_in_candidates_];
     }
   }
