@@ -31,6 +31,14 @@ inline uint64 gbswap_64(uint64 host_int) {
 #endif  // bswap_64
 }
 
+// adapt from gcc macros
+#ifdef __ORDER_LITTLE_ENDIAN__
+#define IS_LITTLE_ENDIAN
+#endif
+#ifdef __ORDER_BIG_ENDIAN__
+#define IS_BIG_ENDIAN
+#endif
+
 #ifdef IS_LITTLE_ENDIAN
 
 // Definitions for ntohl etc. that don't require us to include
