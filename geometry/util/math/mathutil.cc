@@ -7,6 +7,9 @@ using std::vector;
 #include "base/integral_types.h"
 #include "base/logging.h"
 
+#include <cmath>
+using std::log;
+
 MathUtil::QuadraticRootType MathUtil::DegenerateQuadraticRoots(
     long double b,
     long double c,
