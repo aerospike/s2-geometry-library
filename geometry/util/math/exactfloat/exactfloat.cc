@@ -1,7 +1,12 @@
 // Copyright 2009 Google Inc. All Rights Reserved.
 
 #include "util/math/exactfloat/exactfloat.h"
+
+#include <cstdarg>
+#include <cstddef>
+#include <cstdlib>
 #include <cstring>
+#include <cstdio>
 
 #include <math.h>
 #include <algorithm>
@@ -15,7 +20,17 @@ using std::numeric_limits;
 
 #include "base/integral_types.h"
 #include "base/logging.h"
-#include "openssl/crypto.h"
+
+namespace bn {
+#include "bn/crypto.h"
+#include "bn/bn.c"
+#include "bn/bn_asm.c"
+#include "bn/bn_ctx.c"
+#include "bn/bn_mul.c"
+#include "bn/bn_sqr.c"
+}
+
+using namespace bn;
 
 // Define storage for constants.
 const int ExactFloat::kMinExp;
