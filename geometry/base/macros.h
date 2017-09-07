@@ -43,8 +43,13 @@ template <bool>
 struct CompileAssert {
 };
 
+#if __STDC_VERSION__ >= 200300
+#include <assert.h>
+#define COMPILE_ASSERT(expr, msg) static_assert(expr, msg)
+#else
 #define COMPILE_ASSERT(expr, msg) \
-  typedef CompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1]
+  typedef CompileAssert<(bool(expr))> msg[bool(expr) ? 1 : -1] __attribute__((unused))
+#endif
 
 // Implementation details of COMPILE_ASSERT:
 //
