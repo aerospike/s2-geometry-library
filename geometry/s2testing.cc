@@ -45,7 +45,7 @@ uint32 S2Testing::Random::Rand32() {
 
 double S2Testing::Random::RandDouble() {
   const int NUMBITS = 53;
-  return ldexp(Rand64()  & ((1ULL << NUMBITS) - 1ULL), -NUMBITS);
+  return ldexp(double(Rand64()  & ((1ULL << NUMBITS) - 1ULL)), -NUMBITS);
 }
 
 int S2Testing::Random::Uniform(int upper_bound) {

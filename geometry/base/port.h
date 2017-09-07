@@ -117,7 +117,10 @@ typedef uint16_t u_int16_t;
 #define bswap_64(x) OSSwapInt64(x)
 
 #else
-#include <byteswap.h>
+// GCC builtin
+#define bswap_16(x) __builtin_bswap16(x)
+#define bswap_32(x) __builtin_bswap32(x)
+#define bswap_64(x) __builtin_bswap64(x)
 #endif
 
 
